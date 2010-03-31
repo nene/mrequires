@@ -35,8 +35,6 @@
  * requires Median.bar and Median.baz, then these also get loaded
  * when you require Median.foo.
  * 
- * See lib/ wiki for more talk.
- * 
  */
 var mRequires = (function() {
   
