@@ -118,40 +118,40 @@ module MRequires
                    split("mRequires('Foo.bar'); foo();"))
     end
 
-    def test_inside_oneline_comment
+	def test_inside_oneline_comment
       assert_equal([{:type => :source, :value => "bla bla // bla mRequires('foo'); \n "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla bla // bla mRequires('foo'); \n mRequires('bar')"))
+                   split("bla bla // bla mRequires('foo'); \n mRequires('bar');"))
     end
       
     def test_inside_multiline_comment
-      assert_equal([{:type => :source, :value => "bla bla /* bla mRequires('foo'); */ "},
+      assert_equal([{:type => :source, :value => "bla bla /* bla \n mRequires('foo'); */ "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla bla /* bla mRequires('foo'); */ mRequires('bar')"))
+                   split("bla bla /* bla \n mRequires('foo'); */ mRequires('bar');"))
     end
       
     def test_inside_sq_string
       assert_equal([{:type => :source, :value => "bla bla ' bla mRequires('foo'); ' "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla bla ' bla mRequires('foo'); ' mRequires('bar')"))
+                   split("bla bla ' bla mRequires('foo'); ' mRequires('bar');"))
     end
       
     def test_inside_dq_string
       assert_equal([{:type => :source, :value => 'bla bla " bla mRequires("foo"); " '},
                     {:type => :requires, :value => "bar"}],
-                   split('bla bla " bla mRequires("foo"); " mRequires("bar")'))
+                   split('bla bla " bla mRequires("foo"); " mRequires("bar");'))
     end
       
     def test_inside_escaped_sq_string
-      assert_equal([{:type => :source, :value => "bla \' bla ' bla mRequires('foo'); ' "},
+      assert_equal([{:type => :source, :value => "bla ' bla \\' bla mRequires('foo'); ' "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla \' bla ' bla mRequires('foo'); ' mRequires('bar')"))
+                   split("bla ' bla \\' bla mRequires('foo'); ' mRequires('bar');"))
     end
       
     def test_inside_escaped_dq_string
       assert_equal([{:type => :source, :value => 'bla " bla \" bla mRequires("foo"); " '},
                     {:type => :requires, :value => "bar"}],
-                   split('bla " bla \" bla mRequires("foo"); " mRequires("bar")'))
+                   split('bla " bla \" bla mRequires("foo"); " mRequires("bar");'))
     end
       
     # Using somewhat real code

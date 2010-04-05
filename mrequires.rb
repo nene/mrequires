@@ -72,17 +72,44 @@ module MRequires
   #   {:type => :source, :value => " }"},
   # ]
   #
-  # TODO: Currently we don't parse JavaScript properly, which means
-  # that mRequires statements are also found inside comments and
-  # strings.
   #
   class JsSplitter < Splitter
     def self.split(js)
+    
+      temp_requires = 'nRekvirez'
+      
+      while js.include? temp_requires
+        temp_requires = temp_requires + rand(9).to_s
+      end
+    
       result = []
       
+      # One-line comments
+      test = js.scan(/\/\/.*$/)
+      # Multiline comments
+      test = test | js.scan(/\/\*(?:.|[\r\n])*?\*\//m)
+      
+      # Double-quoted strings
+      test = test | js.scan(/"(?:[^"\\]|\\.)*"/)
+      # single-quoted strings
+      test = test | js.scan(/'(?:[^'\\]|\\.)*'/)
+
+      test.uniq!
+      if test.length > 0
+        test.each do |item|    
+          if item.include? 'mRequires'
+	        temp = item.gsub('mRequires', temp_requires)
+	        
+            js.gsub!(item){temp}
+          end
+          
+        end
+      end
+            
       while js.length > 0
         
         if js =~ /\AmRequires\((.*?)\);(.*)\Z/m
+        
           required_stuff = $1
           js = $2
 
@@ -91,10 +118,16 @@ module MRequires
             result << {:type => :requires, :value => item.gsub(/["']/, "")}
           end
         elsif js =~ /\A(.*?)(mRequires\(.*\);.*)\Z/m
-          result << {:type => :source, :value => $1}
+        
+          src = $1
           js = $2
+          
+          src.gsub!(temp_requires, 'mRequires')
+          
+          result << {:type => :source, :value => src}
+          
         else
-          result << {:type => :source, :value => js}
+          result << {:type => :source, :value => js.gsub(temp_requires, 'mRequires')}
           js = ""
         end
         
