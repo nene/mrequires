@@ -118,7 +118,7 @@ module MRequires
                    split("mRequires('Foo.bar'); foo();"))
     end
 
-	def test_inside_oneline_comment
+    def test_inside_oneline_comment
       assert_equal([{:type => :source, :value => "bla bla // bla mRequires('foo'); \n "},
                     {:type => :requires, :value => "bar"}],
                    split("bla bla // bla mRequires('foo'); \n mRequires('bar');"))
@@ -147,13 +147,19 @@ module MRequires
                     {:type => :requires, :value => "bar"}],
                    split("bla ' bla \\' bla mRequires('foo'); ' mRequires('bar');"))
     end
-      
+
     def test_inside_escaped_dq_string
       assert_equal([{:type => :source, :value => 'bla " bla \" bla mRequires("foo"); " '},
                     {:type => :requires, :value => "bar"}],
                    split('bla " bla \" bla mRequires("foo"); " mRequires("bar");'))
     end
-      
+
+    def test_comments_inside_strings
+      assert_equal([{:type => :source, :value => '" // /* "; \' // /* \'; '},
+                    {:type => :requires, :value => "foo"}],
+                   split('" // /* "; \' // /* \'; mRequires("foo");'))
+    end
+
     # Using somewhat real code
     def test_source_and_requires_intermixed
       assert_equal([{:type => :source, :value => "if (true) {\n  "},
