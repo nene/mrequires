@@ -153,6 +153,12 @@ module MRequires
                     {:type => :requires, :value => "bar"}],
                    split('bla " bla \" bla mRequires("foo"); " mRequires("bar");'))
     end
+    
+    def test_comments_inside_strings
+      assert_equal([{:type => :source, :value => '" // /* "; \' // /* \'; '},
+                    {:type => :requires, :value => "foo"}],
+                   split('" // /* "; \' // /* \'; mRequires("foo");'))
+    end
       
     # Using somewhat real code
     def test_source_and_requires_intermixed

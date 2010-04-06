@@ -84,28 +84,51 @@ module MRequires
     
       result = []
       
-      # One-line comments
-      test = js.scan(/\/\/.*$/)
-      # Multiline comments
-      test = test | js.scan(/\/\*(?:.|[\r\n])*?\*\//m)
-      
-      # Double-quoted strings
-      test = test | js.scan(/"(?:[^"\\]|\\.)*"/)
-      # single-quoted strings
-      test = test | js.scan(/'(?:[^'\\]|\\.)*'/)
+      in_str = false
+      stop_char = '';
+        
+      tmp_js = '';
+      new_js = ''
+      prev_char = ''
+    
+	    js.each_char do |char|
+        if !in_str
+          if prev_char+char == '/*' || prev_char+char == '//' || char == '"' || char == "'"
+            in_str = true
+            tmp_js = char
 
-      test.uniq!
-      if test.length > 0
-        test.each do |item|    
-          if item.include? 'mRequires'
-	        temp = item.gsub('mRequires', temp_requires)
-	        
-            js.gsub!(item){temp}
+            if prev_char+char == '/*'
+              stop_char = '*/'
+            elsif prev_char+char == '//'
+              stop_char = "\n"
+            else
+              stop_char = char
+            end
+          else
+            new_js += char
           end
-          
-        end
-      end
+          prev_char = char
+        else
+          if prev_char == '\\' and ( stop_char == '"' or stop_char = "'" )
+            tmp_js += char
+            prev_char = ''
+          elsif prev_char+char == stop_char || char == stop_char
+            in_str = false
+            tmp_js += char
             
+            new_js += tmp_js.gsub('mRequires', temp_requires)
+            
+            tmp_js = ''
+            prev_char = ''
+          else
+            tmp_js += char
+            prev_char = char
+          end
+        end
+	    end
+
+      js = new_js
+                  
       while js.length > 0
         
         if js =~ /\AmRequires\((.*?)\);(.*)\Z/m
