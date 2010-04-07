@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'optparse'
 require 'pp'
+require 'jcode'
 
 module MRequires
   
