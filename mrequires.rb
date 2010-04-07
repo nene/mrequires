@@ -92,7 +92,7 @@ module MRequires
       new_js = ''
       prev_char = ''
     
-	    js.each_char do |char|
+      js.each_char do |char|
         if !in_str
           if prev_char+char == '/*' || prev_char+char == '//' || char == '"' || char == "'"
             in_str = true
@@ -126,7 +126,7 @@ module MRequires
             prev_char = char
           end
         end
-	    end
+      end
 
       js = new_js
                   
