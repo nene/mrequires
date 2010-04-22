@@ -73,91 +73,58 @@ module MRequires
   #   {:type => :source, :value => " }"},
   # ]
   #
-  #
   class JsSplitter < Splitter
     def self.split(js)
-    
-      temp_requires = 'nRekvirez'
-      
-      while js.include? temp_requires
-        temp_requires = temp_requires + rand(9).to_s
-      end
-    
-      result = []
-      
-      in_str = false
-      stop_char = '';
-        
-      tmp_js = '';
-      new_js = ''
-      prev_char = ''
-    
-      js.each_char do |char|
-        if !in_str
-          if prev_char+char == '/*' || prev_char+char == '//' || char == '"' || char == "'"
-            in_str = true
-            tmp_js = char
+      # We have 4 stopchars:
+      #
+      # m - letter m begins mRequires statement
+      # " - double quote begins double-quoted string
+      # ' - single quote begins single-quoted string
+      # / - slash begins either single-line or multiline comment
 
-            if prev_char+char == '/*'
-              stop_char = '*/'
-            elsif prev_char+char == '//'
-              stop_char = "\n"
-            else
-              stop_char = char
-            end
-          else
-            new_js += char
-          end
-          prev_char = char
-        else
-          if prev_char == '\\' and ( stop_char == '"' or stop_char = "'" )
-            tmp_js += char
-            prev_char = ''
-          elsif prev_char+char == stop_char || char == stop_char
-            in_str = false
-            tmp_js += char
-            
-            new_js += tmp_js.gsub('mRequires', temp_requires)
-            
-            tmp_js = ''
-            prev_char = ''
-          else
-            tmp_js += char
-            prev_char = char
-          end
-        end
-      end
-
-      js = new_js
-                  
+      sections = []
       while js.length > 0
-        
+
+        # When string begins with mRequires statement, add requires section
         if js =~ /\AmRequires\((.*?)\);(.*)\Z/m
-        
           required_stuff = $1
           js = $2
 
           # add all required items separately
           required_stuff.strip.split(/\s*,\s*/).each do |item|
-            result << {:type => :requires, :value => item.gsub(/["']/, "")}
+            sections << {:type => :requires, :value => item.gsub(/["']/, "")}
           end
-        elsif js =~ /\A(.*?)(mRequires\(.*\);.*)\Z/m
-        
+
+        # When string begins with string or comment, skip until the
+        # end of string or comment, and add it as source section.
+        #
+        # When it's neither string or comment, but still begins with
+        # stopchar, then add the stopchar as source section and move
+        # on.
+        #
+        # When string doesn't begin with stopchar, skip until the next
+        # stopchar or file end, and add all in-between as source section.
+        #
+        elsif js =~ /\A("(?:[^\\"]|\\\\|\\")*")(.*)\Z/m ||   # single-quoted string
+              js =~ /\A('(?:[^\\']|\\\\|\\')*')(.*)\Z/m ||   # double-quoted string
+              js =~ /\A(\/\/.*?)$(.*)\Z/m               ||   # single-line comment
+              js =~ /\A(\/\*.*?\*\/)(.*)\Z/m            ||   # multiline comment
+              js =~ /\A([m"'\/])(.*)\Z/m                ||   # ignorable stopchar
+              js =~ /\A([^m"'\/]*)(.*)\Z/m
           src = $1
           js = $2
-          
-          src.gsub!(temp_requires, 'mRequires')
-          
-          result << {:type => :source, :value => src}
-          
-        else
-          result << {:type => :source, :value => js.gsub(temp_requires, 'mRequires')}
-          js = ""
+
+          # When previous section was source section, append source to
+          # that. Otherwise start new source section.
+          if sections.last && sections.last[:type] == :source
+            sections.last[:value] += src
+          else
+            sections << {:type => :source, :value => src}
+          end
         end
-        
       end
-      
-      return result
+
+      return sections
     end
   end
 
