@@ -38,4 +38,14 @@ test("makeUrl with paths for some namespaces", function() {
   same(makeUrl("Foobar"), "default/Foobar.js");
 });
 
+// Load test-script.js and check tha we can call function from that file.
+test("smoke test", function() {
+  MRequires.init({
+    "": ""
+  });
+  MRequires("test-script");
+
+  same(testScript(), "Hello");
+});
+
 

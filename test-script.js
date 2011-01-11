@@ -1,0 +1,3 @@
+function testScript() {
+  return "Hello";
+}
