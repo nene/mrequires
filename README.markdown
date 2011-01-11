@@ -1,7 +1,6 @@
-mRequires - Median JS loader and builder
+MRequires - Median JS loader and builder
 ========================================
-
-mRequires is a JavaScipt build system used internally at [Median][].
+MRequires is a JavaScipt build system used internally at [Median][].
 
 It provides dynamic loading of JavaScript files at development time
 and concatenation of all the code into one big JavaScript file for
@@ -11,8 +10,8 @@ deployment.
 Usage
 -----
 
-To use mRequires statements in JavaScript you must first include the
-mrequires.js file and then initialize mRequires, specifying loading
+To use MRequires statements in JavaScript you must first include the
+mrequires.js file and then initialize MRequires, specifying loading
 path for each namespace:
 
     MRequires.init({
@@ -21,7 +20,7 @@ path for each namespace:
       "": "external-libs/"   // fallback for everything else
     });
 
-After that one can use mRequires for loading files:
+After that one can use MRequires for loading files:
 
     MRequires("MyApp.SettingsPanel");
     MRequires("MyApp.some.other.Component");
@@ -34,7 +33,7 @@ Or doing the same with just one function call:
       "MyApp.SettingsPanel",
       "MyApp.some.other.Component",
       "MyLib.FooBar",
-      "jquery" 
+      "jquery
     );
 
 The code above (together with MRequires.init) will load the following
@@ -49,7 +48,7 @@ This dynamic loading is all good for development purposes, but for
 deployed app we want to concatenate all our JavaScript files into one
 big file.  This work is done by mrequires.rb script.
 
-The script takes the same config as mRequires.init(), but in a
+The script takes the same config as MRequires.init(), but in a
 slightly different format, and the JavaScript file to use as a
 starting point:
 

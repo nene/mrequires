@@ -6,7 +6,7 @@
  * 
  *   // First initialize requirerer by defining namespace-path mapping.
  *   // "" specifies the default path.
- *   mRequires.init({
+ *   MRequires.init({
  *     Median: "../lib/js/median/",
  *     SeeMe: "js/",
  *     "": "../lib/js/"
@@ -14,7 +14,7 @@
  *   
  *   // Then require the JS and CSS files you need.  Note that adding
  *   // ".js" extension is optional, but ".css" is mandatory.
- *   mRequires(
+ *   MRequires(
  *     "SeeMe.foo",
  *     "SeeMe.bar.baz.js",
  *     "SeeMe.bar.baz.css",
@@ -36,14 +36,14 @@
  * when you require Median.foo.
  * 
  */
-var mRequires = (function() {
+var MRequires = (function() {
   
   var conf = undefined;
   var loaded = {};
   
   /**
-   * Initializes mRequires with conf object.
-   * @returns mRequires function itself (just for convenience).
+   * Initializes MRequires with conf object.
+   * @returns MRequires function itself (just for convenience).
    */
   function init(configuration) {
     conf = configuration;
@@ -73,11 +73,11 @@ var mRequires = (function() {
       },
       
       // Make a lot of noise on error.
-      // Failed mRequires() usually results in serious crash
+      // Failed MRequires() usually results in serious crash
       // when concatenating JS files for deployment.
       failure: function(response) {
         alert(
-          "mRequires: Loading file '" + url + "'\n" +
+          "MRequires: Loading file '" + url + "'\n" +
           "Got: " + response.status + " " + response.statusText
         );
       }
@@ -172,7 +172,7 @@ var mRequires = (function() {
    */
   function requires() {
     if (!conf) {
-      alert("Mrequires: mRequires() used before MRequires.init() called.");
+      alert("MRequires: MRequires() used before MRequires.init() called.");
       return;
     }
     
@@ -195,7 +195,7 @@ var mRequires = (function() {
           loadCss(url);
         }
         else {
-          alert("mRequires: Unknown file type '"+url+"'.");
+          alert("MRequires: Unknown file type '"+url+"'.");
         }
       }
     }

@@ -7,13 +7,13 @@ module MRequires
   class TestModuleName < Test::Unit::TestCase
     def test_resolve_with_only_default_path
       mn = MRequires::ModuleName.new({"" => "foo/"})
-      
+
       # components are by default JavaScript files
       assert_equal("foo/bar.js", mn.resolve("bar"))
       assert_equal("foo/bar/baz.js", mn.resolve("bar.baz"))
       assert_equal("foo/bar/baz.js", mn.resolve("bar.baz"))
       assert_equal("foo/bar/bar/baz.js", mn.resolve("bar.bar.baz"))
-      
+
       # .js extension is optional
       assert_equal("foo/bar.js", mn.resolve("bar.js"))
       assert_equal("foo/bar/js/baz.js", mn.resolve("bar.js.baz"))
@@ -21,41 +21,41 @@ module MRequires
       # .css extension is required for CSS files
       assert_equal("foo/bar.css", mn.resolve("bar.css"))
       assert_equal("foo/bar/baz.css", mn.resolve("bar.baz.css"))
-      
+
       # UPPERCASE extensions are silly, and therefore not acceptable
       assert_equal("foo/bar/JS.js", mn.resolve("bar.JS"))
       assert_equal("foo/bar/CSS.js", mn.resolve("bar.CSS"))
     end
-    
+
     def test_resolve_with_paths_for_some_namespaces
       mn = MRequires::ModuleName.new({
                                         "Foo" => "foo/",
                                         "Bar" => "../lib/bar/",
                                         "" => "default/"
                                       });
-      
+
       assert_equal("foo/bar.js", mn.resolve("Foo.bar"))
       assert_equal("../lib/bar/baz.js", mn.resolve("Bar.baz"))
       assert_equal("default/Hoo/bar.js", mn.resolve("Hoo.bar"))
       assert_equal("foo/bar.css", mn.resolve("Foo.bar.css"))
-  
+
       # ensure, that we don't use Foo namespace here
       assert_equal("default/Foobar.js", mn.resolve("Foobar"))
     end
-    
+
     def test_paths_without_trailing_slash
       mn = MRequires::ModuleName.new({
                                         "Foo" => "foo",
                                         "Bar" => "../lib/bar",
                                         "" => "default"
                                       });
-      
+
       assert_equal("foo/bar.js", mn.resolve("Foo.bar"))
       assert_equal("../lib/bar/baz.js", mn.resolve("Bar.baz"))
       assert_equal("default/Hoo/bar.js", mn.resolve("Hoo.bar"))
     end
   end
-  
+
   class TestSplitter < Test::Unit::TestCase
     def test_split_file
       Splitter.expects(:split).with(:source).returns(:splitted)
@@ -63,13 +63,13 @@ module MRequires
       assert_equal :splitted, Splitter.split_file("foo.js")
     end
   end
-  
+
   class TestJsSplitter < Test::Unit::TestCase
     # smaller name for test function
     def split(js)
       MRequires::JsSplitter.split(js)
     end
-    
+
     def test_source_code_only
       assert_equal([{:type => :source, :value => "blah blah"}],
                    split("blah blah"))
@@ -77,29 +77,29 @@ module MRequires
 
     def test_requires_only
       assert_equal([{:type => :requires, :value => "Foo.bar"}],
-                   split("mRequires('Foo.bar');"))
+                   split("MRequires('Foo.bar');"))
     end
-      
+
     def test_requires_only_with_double_quotes
       assert_equal([{:type => :requires, :value => "Foo.bar.baz.js"}],
-                   split('mRequires("Foo.bar.baz.js");'))
+                   split('MRequires("Foo.bar.baz.js");'))
     end
-      
+
     def test_multiple_requires_simple
       assert_equal([{:type => :requires, :value => "foo"},
                     {:type => :requires, :value => "bar"}],
-                   split("mRequires('foo', 'bar');"))
+                   split("MRequires('foo', 'bar');"))
     end
-      
+
     def test_multiple_requires_complex
       assert_equal([{:type => :requires, :value => "foo"},
                     {:type => :requires, :value => "bar"},
                     {:type => :requires, :value => "baz"}],
-                   split("mRequires( \n 'foo', \n \"bar\",'baz' \n );"))
+                   split("MRequires( \n 'foo', \n \"bar\",'baz' \n );"))
     end
 
     def test_empty_requires
-      assert_equal([], split("mRequires( );"))
+      assert_equal([], split("MRequires( );"))
     end
 
     def test_empty_source
@@ -109,55 +109,55 @@ module MRequires
     def test_source_before_requires
       assert_equal([{:type => :source, :value => "foo(); "},
                     {:type => :requires, :value => "Foo.bar"}],
-                   split("foo(); mRequires('Foo.bar');"))
+                   split("foo(); MRequires('Foo.bar');"))
     end
-      
+
     def test_source_after_requires
       assert_equal([{:type => :requires, :value => "Foo.bar"},
                     {:type => :source, :value => " foo();"}],
-                   split("mRequires('Foo.bar'); foo();"))
+                   split("MRequires('Foo.bar'); foo();"))
     end
 
     def test_inside_oneline_comment
-      assert_equal([{:type => :source, :value => "bla bla // bla mRequires('foo'); \n "},
+      assert_equal([{:type => :source, :value => "bla bla // bla MRequires('foo'); \n "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla bla // bla mRequires('foo'); \n mRequires('bar');"))
+                   split("bla bla // bla MRequires('foo'); \n MRequires('bar');"))
     end
-      
+
     def test_inside_multiline_comment
-      assert_equal([{:type => :source, :value => "bla bla /* bla \n mRequires('foo'); */ "},
+      assert_equal([{:type => :source, :value => "bla bla /* bla \n MRequires('foo'); */ "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla bla /* bla \n mRequires('foo'); */ mRequires('bar');"))
+                   split("bla bla /* bla \n MRequires('foo'); */ MRequires('bar');"))
     end
-      
+
     def test_inside_sq_string
-      assert_equal([{:type => :source, :value => "bla bla ' bla mRequires('foo'); ' "},
+      assert_equal([{:type => :source, :value => "bla bla ' bla MRequires('foo'); ' "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla bla ' bla mRequires('foo'); ' mRequires('bar');"))
+                   split("bla bla ' bla MRequires('foo'); ' MRequires('bar');"))
     end
-      
+
     def test_inside_dq_string
-      assert_equal([{:type => :source, :value => 'bla bla " bla mRequires("foo"); " '},
+      assert_equal([{:type => :source, :value => 'bla bla " bla MRequires("foo"); " '},
                     {:type => :requires, :value => "bar"}],
-                   split('bla bla " bla mRequires("foo"); " mRequires("bar");'))
+                   split('bla bla " bla MRequires("foo"); " MRequires("bar");'))
     end
-      
+
     def test_inside_escaped_sq_string
-      assert_equal([{:type => :source, :value => "bla ' bla \\' bla mRequires('foo'); ' "},
+      assert_equal([{:type => :source, :value => "bla ' bla \\' bla MRequires('foo'); ' "},
                     {:type => :requires, :value => "bar"}],
-                   split("bla ' bla \\' bla mRequires('foo'); ' mRequires('bar');"))
+                   split("bla ' bla \\' bla MRequires('foo'); ' MRequires('bar');"))
     end
 
     def test_inside_escaped_dq_string
-      assert_equal([{:type => :source, :value => 'bla " bla \" bla mRequires("foo"); " '},
+      assert_equal([{:type => :source, :value => 'bla " bla \" bla MRequires("foo"); " '},
                     {:type => :requires, :value => "bar"}],
-                   split('bla " bla \" bla mRequires("foo"); " mRequires("bar");'))
+                   split('bla " bla \" bla MRequires("foo"); " MRequires("bar");'))
     end
 
     def test_comments_inside_strings
       assert_equal([{:type => :source, :value => '" // /* "; \' // /* \'; '},
                     {:type => :requires, :value => "foo"}],
-                   split('" // /* "; \' // /* \'; mRequires("foo");'))
+                   split('" // /* "; \' // /* \'; MRequires("foo");'))
     end
 
     # Using somewhat real code
@@ -170,10 +170,10 @@ module MRequires
                     {:type => :source, :value => "\n}\n"},
                    ],
                    split("if (true) {\n" +
-                         "  mRequires('foo');\n"+
+                         "  MRequires('foo');\n"+
                          "}\n" +
                          "else {\n" +
-                         "  mRequires('bar', 'baz');\n"+
+                         "  MRequires('bar', 'baz');\n"+
                          "}\n"))
     end
   end
@@ -183,32 +183,32 @@ module MRequires
     def split(js)
       MRequires::CssSplitter.split(js)
     end
-    
+
     def test_source_code_only
       assert_equal([{:type => :source, :value => "blah blah"}],
                    split("blah blah"))
     end
-    
+
     def test_url_only
       assert_equal([{:type => :url, :value => "img/foo.jpg"}],
                    split("url('img/foo.jpg')"))
     end
-      
+
     def test_url_only_with_double_quotes
       assert_equal([{:type => :url, :value => "img/foo.jpg"}],
                    split('url("img/foo.jpg")'))
     end
-      
+
     def test_url_only_without_quotes
       assert_equal([{:type => :url, :value => "img/foo.jpg"}],
                    split('url(img/foo.jpg)'))
     end
-      
+
     def test_url_only_without_quotes_spaced
       assert_equal([{:type => :url, :value => "img/foo.jpg"}],
                    split("url(  img/foo.jpg \t  )"))
     end
-      
+
     def test_empty_source
       assert_equal([], split(""))
     end
@@ -229,44 +229,44 @@ module MRequires
                          "}\n"))
     end
   end
-  
+
   class TestParser < Test::Unit::TestCase
     def setup
       JsSplitter.stubs(:split_file).returns([])
       @parser = Parser.new(:conf)
     end
-    
+
     def test_conf_is_passed_to_ModuleName
       ModuleName.expects(:new).with(:conf)
       parser = Parser.new(:conf)
     end
-    
+
     def test_file_is_splitted
       JsSplitter.expects(:split_file).with(:filename).returns([])
       @parser.concat(:filename)
     end
-    
+
     def test_only_source_segment
       JsSplitter.stubs(:split_file).returns([{:type => :source, :value => "Some JS code"}])
       assert_equal "Some JS code", @parser.concat(:filename)
     end
-    
+
     def test_many_source_segments
       JsSplitter.stubs(:split_file).returns([{:type => :source, :value => "Some JS code,"},
                                            {:type => :source, :value => "More JS code"}])
       assert_equal "Some JS code,More JS code", @parser.concat(:filename)
     end
-    
+
     def test_require_one_js_file
       ModuleName.any_instance.expects(:resolve).with("Bar").returns("bar.js")
-      
+
       JsSplitter.expects(:split_file).with("foo.js").returns([{:type => :requires, :value => "Bar"},
                                                             {:type => :source, :value => "<local JS>"}])
       JsSplitter.expects(:split_file).with("bar.js").returns([{:type => :source, :value => "<included JS>"}])
-      
+
       assert_equal "<included JS><local JS>", @parser.concat("foo.js")
     end
-    
+
   end
 
   class TestParserLive < Test::Unit::TestCase
@@ -276,28 +276,28 @@ module MRequires
       end
       @parser = Parser.new({"" => "js/"})
     end
-    
+
     def test_two_files_require_same_file
       prepare({
-        "js/Init.js" => "mRequires('View');mRequires('Lang');<init>",
-        "js/View.js" => "mRequires('Lang');<view>",
+        "js/Init.js" => "MRequires('View');MRequires('Lang');<init>",
+        "js/View.js" => "MRequires('Lang');<view>",
         "js/Lang.js" => "<lang>",
       })
       assert_equal "<lang><view><init>", @parser.concat("js/Init.js")
     end
-    
+
     def test_ignoring_css_files
       prepare({
-        "js/Init.js" => "mRequires('Foo.css');mRequires('View.js');<init>",
-        "js/View.js" => "mRequires('Haa.css');<view>",
+        "js/Init.js" => "MRequires('Foo.css');MRequires('View.js');<init>",
+        "js/View.js" => "MRequires('Haa.css');<view>",
       })
       assert_equal "<view><init>", @parser.concat("js/Init.js")
     end
-    
+
     def test_css_mode
       prepare({
-        "js/Init.js" => "mRequires('Foo.css');mRequires('View.js');mRequires('Haa.css');<init>",
-        "js/View.js" => "mRequires('Haa.css');<view>mRequires('Hii.css');",
+        "js/Init.js" => "MRequires('Foo.css');MRequires('View.js');MRequires('Haa.css');<init>",
+        "js/View.js" => "MRequires('Haa.css');<view>MRequires('Hii.css');",
         "js/Foo.css" => "#foo{background:url(img/foo.jpg)}\n",
         "js/Haa.css" => "#haa{background:url('../../src/images/haa.jpg')}\n",
         "js/Hii.css" => "#hii{background:url(\"hii.jpg\")}\n",
@@ -307,11 +307,11 @@ module MRequires
                    "#hii{background:url('hii.jpg')}\n",
                    @parser.concat("js/Init.js", :css))
     end
-    
+
     def test_img_mode
       prepare({
-        "js/Init.js" => "mRequires('Foo.css');mRequires('View.js');mRequires('Haa.Haa.css');<init>",
-        "js/View.js" => "mRequires('Haa.Haa.css');<view>mRequires('Hii.css');",
+        "js/Init.js" => "MRequires('Foo.css');MRequires('View.js');MRequires('Haa.Haa.css');<init>",
+        "js/View.js" => "MRequires('Haa.Haa.css');<view>MRequires('Hii.css');",
         "js/Foo.css" => "#foo{background:url(img/foo.jpg)}\n",
         "js/Haa/Haa.css" => "#haa{background:url('../haa.jpg')}\n",
         "js/Hii.css" => "#hii{background:url(\"hii.jpg\")}\n",
@@ -321,11 +321,11 @@ module MRequires
                    "js/hii.jpg\n",
                    @parser.concat("js/Init.js", :img))
     end
-    
+
     def test_jsfiles_mode
       prepare({
-        "js/Init.js" => "mRequires('View');mRequires('Foo.css');<init>",
-        "js/View.js" => "mRequires('Display');<view>mRequires('Foo.css');",
+        "js/Init.js" => "MRequires('View');MRequires('Foo.css');<init>",
+        "js/View.js" => "MRequires('Display');<view>MRequires('Foo.css');",
         "js/Display.js" => "<display>"
       })
       assert_equal("js/Init.js\n" +
@@ -334,5 +334,5 @@ module MRequires
                    @parser.concat("js/Init.js", :jsfiles))
     end
   end
-  
+
 end

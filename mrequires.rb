@@ -4,7 +4,7 @@ require 'pp'
 require 'jcode'
 
 module MRequires
-  
+
   class ModuleName
     # Takes config object, that specifies where dirrerent namespaces
     # can be found.
@@ -23,11 +23,11 @@ module MRequires
       else
         suffix = ".js"
       end
-      
+
       # remove any existing .js or .css suffix,
       # so that we can replace remaining dots with dashes
       cmp_name = name.sub(Regexp.new("\\" + suffix + "$"), "")
-        
+
       # divide component name into name and namespace.
       # when path for that namespace is defined in config,
       # use that path, otherwise use default path
@@ -39,10 +39,10 @@ module MRequires
         path = @conf[""];
         sub_cmp_name = cmp_name;
       end
-      
+
       # add slash to the end of path if it's not already there
       path = /\/$/ =~ path ? path : path+"/"
-      
+
       return path + sub_cmp_name.gsub(/\./, "/") + suffix;
     end
   end
@@ -56,13 +56,13 @@ module MRequires
       self.split( File.new(filename).read )
     end
   end
-  
-  # Splits javascript string containing mRequires stataments
+
+  # Splits javascript string containing MRequires stataments
   # into sections of code and required files.
   #
   # For example:
   #
-  # JsSplitter.split('if (true) { mRequires("Foo.js", "Bar.js"); }')
+  # JsSplitter.split('if (true) { MRequires("Foo.js", "Bar.js"); }')
   #
   # will produce the following array:
   #
@@ -77,7 +77,7 @@ module MRequires
     def self.split(js)
       # We have 4 stopchars:
       #
-      # m - letter m begins mRequires statement
+      # m - letter m begins MRequires statement
       # " - double quote begins double-quoted string
       # ' - single quote begins single-quoted string
       # / - slash begins either single-line or multiline comment
@@ -85,8 +85,8 @@ module MRequires
       sections = []
       while js.length > 0
 
-        # When string begins with mRequires statement, add requires section
-        if js =~ /\AmRequires\((.*?)\);(.*)\Z/m
+        # When string begins with MRequires statement, add requires section
+        if js =~ /\AMRequires\((.*?)\);(.*)\Z/m
           required_stuff = $1
           js = $2
 
@@ -109,8 +109,8 @@ module MRequires
               js =~ /\A('(?:[^\\']|\\\\|\\')*')(.*)\Z/m ||   # double-quoted string
               js =~ /\A(\/\/.*?)$(.*)\Z/m               ||   # single-line comment
               js =~ /\A(\/\*.*?\*\/)(.*)\Z/m            ||   # multiline comment
-              js =~ /\A([m"'\/])(.*)\Z/m                ||   # ignorable stopchar
-              js =~ /\A([^m"'\/]*)(.*)\Z/m
+              js =~ /\A([M"'\/])(.*)\Z/m                ||   # ignorable stopchar
+              js =~ /\A([^M"'\/]*)(.*)\Z/m
           src = $1
           js = $2
 
@@ -145,9 +145,9 @@ module MRequires
   class CssSplitter < Splitter
     def self.split(css)
       result = []
-      
+
       while css.length > 0
-        
+
         if css =~ /\Aurl\((.*?)\)(.*)\Z/m
           css = $2
           result << {:type => :url, :value => $1.strip.gsub(/["']/, "")}
@@ -158,13 +158,13 @@ module MRequires
           result << {:type => :source, :value => css}
           css = ""
         end
-        
+
       end
-      
+
       return result
     end
   end
-  
+
   class Parser
     def initialize(conf)
       @required_files = {}
@@ -179,7 +179,7 @@ module MRequires
     def concat(filename, mode=:js)
       result = ""
       result += filename+"\n" if mode == :jsfiles
-      
+
       JsSplitter.split_file(filename).each do |item|
         case item[:type]
         when :source
@@ -198,7 +198,7 @@ module MRequires
           end
         end
       end
-      
+
       return result
     end
 
@@ -224,7 +224,7 @@ module MRequires
       end
       return result
     end
-    
+
   end
 
 end
@@ -238,15 +238,15 @@ if ARGV[0]
     :conf => {"" => "js"},
     :file => "",
   }
-  
+
   opts = OptionParser.new do | opts |
     opts.banner = "Usage: ruby mrequires.rb [options] file.js"
-    
+
     opts.on('-t', '--type=TYPE', [:js, :css, :img, :jsfiles], "Result type (js, css, img, jsfiles)") do |type|
       options[:type] = type
     end
-    
-    opts.on('-c', '--conf=PATHS', "mRequires paths config: Namespace1:path1,NS2:path2,:default/path.\n"+
+
+    opts.on('-c', '--conf=PATHS', "MRequires paths config: Namespace1:path1,NS2:path2,:default/path.\n"+
             "\t\t\t\t     For example --conf=Foo:/lib/foo,Bar:/lib/bar,:/default") do |conf|
       options[:conf] = Hash[ *conf.split(/,/).map{|x|x.split(/:/)}.flatten ]
     end

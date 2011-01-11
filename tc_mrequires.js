@@ -1,7 +1,7 @@
-module("mRequires");
+module("MRequires");
 
 test("makeUrl with only default path", function() {
-  var makeUrl = mRequires.init({"": "foo/"}).makeUrl;
+  var makeUrl = MRequires.init({"": "foo/"}).makeUrl;
 
   // components are by default JavaScript files
   same(makeUrl("bar"), "foo/bar.js");
@@ -23,7 +23,7 @@ test("makeUrl with only default path", function() {
 });
 
 test("makeUrl with paths for some namespaces", function() {
-  var makeUrl = mRequires.init({
+  var makeUrl = MRequires.init({
     Foo: "foo/",
     Bar: "../lib/bar/",
     "": "default/"
